@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creative Lens — Ad Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14141b;--panel:#1c1b24;--panel-2:#24232d;--panel-3:#2c2a36;--line:#373541;--ink:#f0eee8;--muted:#a5a2b0;--dim:#777482;--plum:#6b536b;--lime:#d8ff67;--lime-soft:#313a25;--danger:#ff8278;--sans:'DM Sans',Arial,sans-serif;--serif:'Playfair Display',Georgia,serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button,select{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-offset:3px}button{transition:background .18s,border-color .18s,color .18s,transform .18s}button:active{transform:translateY(1px)}
+.app-shell{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:250px;background:#17161e;border-right:1px solid var(--line);padding:25px 17px 18px;display:flex;flex-direction:column;z-index:10;overflow-y:auto}.brand-lockup{display:flex;gap:11px;align-items:center;padding:0 10px 30px}.brand-symbol{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:var(--lime);color:#18191a;font-size:22px}.brand-name{font:500 25px/1 var(--serif);letter-spacing:-.6px}.brand-caption{font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.035em}.side-label{padding:0 13px 10px;color:var(--dim);font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase}.side-nav,.category-list{display:grid;gap:4px}.nav-btn,.category-btn{display:flex;align-items:center;gap:12px;width:100%;border:1px solid transparent;background:transparent;text-align:left;color:var(--muted);border-radius:10px;padding:11px 13px;font-size:13px}.nav-btn:hover,.category-btn:hover{background:var(--panel-2);color:var(--ink)}.nav-btn.active,.category-btn.active{background:#303528;border-color:#3c4430;color:var(--lime)}.nav-btn-soon{opacity:.72}.coming-soon{margin-left:5px;padding:2px 5px;border:1px solid var(--line);border-radius:5px;color:var(--dim);font:9px var(--mono);text-transform:uppercase;letter-spacing:.04em}.nav-icon{width:17px;text-align:center;font-size:16px}.side-divider{height:1px;background:var(--line);margin:19px 12px}.category-group-label{margin:11px 13px 5px;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.09em}.category-btn{padding:9px 13px;font-size:12.5px}.sidebar-bottom{margin-top:auto;padding-top:20px}.design-filter{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--panel)}.design-filter-head{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:600;color:var(--lime)}.design-filter p{font-size:11px;line-height:1.5;color:var(--muted);margin:9px 0 12px 22px}.switch-row{display:flex;justify-content:space-between;align-items:center;padding-left:22px;font-size:10px;color:var(--muted)}.switch{width:36px;height:21px;border:0;border-radius:99px;background:#555360;padding:3px;display:flex;align-items:center}.switch:after{content:'';width:15px;height:15px;border-radius:50%;background:#f3f1eb;transition:transform .18s}.switch.active{background:var(--lime);justify-content:flex-end}.switch.active:after{background:#1b1b1c}
+.main{margin-left:250px;min-width:0}.topbar{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:17px 34px 0}.top-note{font:10px var(--mono);letter-spacing:.06em;color:var(--dim)}.icon-button,.avatar{width:35px;height:35px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:50%;display:grid;place-items:center}.avatar{background:var(--lime);border-color:var(--lime);color:#17181a;font-size:12px;font-weight:700}.hero{position:relative;padding:24px 36px 18px;overflow:hidden;min-height:133px}.hero:after{content:'✳';position:absolute;right:8%;top:-72px;font:220px/1 var(--serif);color:var(--plum);opacity:.24;transform:rotate(20deg);pointer-events:none}.hero-kicker{font:10px var(--mono);text-transform:uppercase;letter-spacing:.17em;color:var(--lime);margin-bottom:10px}.hero h1{position:relative;z-index:1;font:500 clamp(34px,3.3vw,49px)/1.1 var(--serif);letter-spacing:-1.3px;margin:0;max-width:760px}.hero h1 em{font-weight:500;color:var(--lime)}.hero p{position:relative;z-index:1;color:var(--muted);font-size:13px;margin:9px 0 0;max-width:650px;line-height:1.6}
+.search-area{padding:0 36px 20px}.search-row{display:flex;gap:10px;align-items:stretch}.search-box{height:53px;display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid #45424f;border-radius:13px;padding:0 8px 0 16px;flex:1;min-width:0}.search-icon{font-size:20px;color:var(--muted)}.search-box input{border:0;outline:none!important;box-shadow:none;min-width:0;flex:1;background:transparent;font-size:13px;color:var(--ink)}.search-box input::placeholder{color:#777482}.search-btn{height:39px;align-self:center;background:var(--lime);color:#191a19;border:1px solid var(--lime);border-radius:9px;padding:0 21px;font-size:12px;font-weight:700}.search-btn:hover{background:#e4ff91}.country-select{height:53px;min-width:145px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:0 13px;color:var(--ink);font-size:12px}.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.pill-select,.filter-btn,.sort-select,#fBrand{height:36px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:#d5d2dc;padding:0 11px;font-size:11.5px}.pill-select option,.pill-select optgroup{background:var(--panel);color:var(--ink)}#fBrand{width:142px;min-width:110px}#fBrand::placeholder{color:#8b8897}.filter-btn{display:flex;align-items:center;gap:7px}.filter-btn.active{background:var(--lime-soft);color:var(--lime);border-color:#657544}.filter-btn#fDesign.active{background:var(--lime-soft);color:var(--lime);border-color:#657544}.sort-wrap{display:flex;align-items:center;gap:7px;margin-left:auto;font-size:11px;color:var(--muted)}.status-hint{margin-top:10px;color:var(--dim);font-size:11px;line-height:1.5}.status-hint strong{color:var(--muted);font-weight:500}
+/* Two-stage live session panel */
+#progressBar{display:none;margin:0 36px 22px;background:linear-gradient(135deg,#211f29,#1b1b23);border:1px solid #3d3947;border-radius:17px;overflow:hidden;position:relative}#progressBar.show{display:block}.session-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 19px 13px;border-bottom:1px solid #35323e}.session-kicker{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.session-title{font:500 19px var(--serif);margin-top:5px}.stage-pills{display:flex;align-items:center;gap:6px}.stage-pill{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:99px;color:var(--dim);font-size:10px;white-space:nowrap}.stage-pill .stage-index{font:10px var(--mono)}.stage-pill.active{background:var(--lime-soft);border-color:#596941;color:var(--lime)}.stage-pill.complete{color:#c4e88a;border-color:#46563a}.stage-dot{width:6px;height:6px;border-radius:50%;background:currentColor}.session-body{padding:18px 19px 17px}.stage-copy{display:flex;align-items:flex-start;gap:13px}.stage-icon{flex-shrink:0;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#30303a;color:var(--lime);font-size:18px}.stage-text{flex:1;min-width:0}.stage-text h3{font-size:13px;margin:1px 0 5px;font-weight:600}.stage-text p{font-size:11px;color:var(--muted);margin:0;line-height:1.55}.stop-btn{border:1px solid #784742;color:var(--danger);background:#2d2025;border-radius:9px;padding:9px 12px;font-size:11px;white-space:nowrap}.stop-btn:hover{background:#42272a}.collect-indeterminate{height:5px;background:#34323d;border-radius:99px;overflow:hidden;margin:17px 0 0 53px}.collect-indeterminate:after{content:'';display:block;height:100%;width:27%;background:var(--lime);border-radius:99px;animation:travel 1.5s ease-in-out infinite}@keyframes travel{0%{transform:translateX(-110%)}100%{transform:translateX(390%)}}.analysis-grid{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:17px}.analysis-grid.show{display:grid}.metric{background:#25232e;border:1px solid #393643;border-radius:12px;padding:13px 14px;min-width:0}.metric-label{font:9px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}.metric-value{font:500 clamp(25px,3vw,37px)/1.1 var(--serif);letter-spacing:-.6px;color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}.metric-value.lime{color:var(--lime)}.metric-sub{font-size:10px;color:var(--dim);margin-top:5px}.analysis-track{height:5px;background:#363440;border-radius:99px;overflow:hidden;margin-top:15px}.analysis-track-fill{height:100%;width:0;background:var(--lime);border-radius:99px;transition:width .35s}.analysis-foot{display:flex;justify-content:space-between;gap:12px;margin-top:9px;color:var(--dim);font:10px var(--mono)}.analysis-foot strong{color:var(--muted);font-weight:400}.session-complete{display:none;padding:10px 19px;background:#242b20;border-top:1px solid #3a4432;color:#cce9a0;font-size:11px}.session-complete.show{display:block}
+.content{padding:0 36px 45px}.content-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:5px 0 16px}.result-summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.result-summary strong{font-size:13px;font-weight:600}.live-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:20px;background:#252b21;color:#cce9a0;font-size:10px}.live-badge .dot{width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block}.view-actions{display:flex;gap:5px;align-items:center}.view-toggle{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:8px;width:32px;height:32px;font-size:16px}.view-toggle.active{background:var(--panel-3);border-color:var(--line);color:var(--lime)}#resultCount{font-size:13px;color:var(--ink)}.grid{display:block;columns:4 205px;column-gap:13px;padding-bottom:25px}.card{display:inline-flex;vertical-align:top;flex-direction:column;width:100%;margin:0 0 13px;break-inside:avoid;background:var(--panel);border:1px solid #34323e;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 3px 10px #0000000c;transition:transform .22s,box-shadow .22s,border-color .22s}.card:hover{transform:translateY(-3px);box-shadow:0 12px 30px #0004;border-color:#62556a}.creative-media{position:relative;background:#292731;overflow:hidden}.creative-media img{display:block;width:100%;height:auto;min-height:130px;max-height:560px;object-fit:cover;background:#292731;transition:transform .35s}.card:hover .creative-media img{transform:scale(1.015)}.creative-media img.image-error{display:none}.image-placeholder{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:20px;text-align:center;color:var(--muted);background:radial-gradient(circle at 50% 30%,#34313f,#24232c 70%);font-size:12px}.image-placeholder:before{content:"✳";display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#34313b;color:var(--lime);font-size:21px}.image-placeholder small{font-size:10px;color:var(--dim)}.sel{position:absolute;top:11px;left:11px;z-index:3;width:17px;height:17px;accent-color:var(--lime);opacity:0;transition:opacity .15s}.card:hover .sel,.sel:focus-visible{opacity:1}.save-float{position:absolute;z-index:4;right:10px;top:10px;width:33px;height:33px;border:1px solid #ffffff6b;background:#191820dc;color:#f0eee8;border-radius:50%;font-size:17px;display:grid;place-items:center;backdrop-filter:blur(8px)}.save-float:hover,.save-float.saved{background:var(--lime);color:#18191a;border-color:var(--lime)}.card-hover-actions{position:absolute;inset:auto 0 0;padding:32px 12px 11px;background:linear-gradient(transparent,#000b);opacity:0;transition:opacity .18s}.card:hover .card-hover-actions{opacity:1}.viewlink{display:inline-block;text-decoration:none;color:#fff;background:#ffffff20;border:1px solid #ffffff80;border-radius:20px;padding:7px 11px;font-size:11px;backdrop-filter:blur(8px)}.card-body{padding:11px 12px 12px}.brand-row{display:flex;align-items:center;gap:8px;min-width:0}.brand-mark{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;background:#34303b;color:var(--lime);font-size:11px;font-weight:700;flex-shrink:0}.brand-info{min-width:0;flex:1}.brand{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cat{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.platform-mark{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;flex-shrink:0;background:#2e2d39;color:#d5d2dc}.card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:9px;color:var(--muted)}.quality-dot{width:5px;height:5px;border-radius:50%;background:var(--lime)}.meta-separator{color:var(--dim)}.rank-score{margin-left:auto;font:10px var(--mono);color:var(--lime)}.empty{display:none;text-align:center;padding:64px 20px;color:var(--muted);font-size:13px;line-height:1.7;border:1px dashed var(--line);border-radius:14px;background:#1a1921}.empty strong{display:block;color:var(--ink);font:500 22px var(--serif);margin-bottom:8px}.empty button{margin-top:14px;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:11px}.error-banner{display:none;margin:0 36px 16px;padding:12px 14px;border:1px solid #784742;background:#2d2025;color:#ffc0b9;border-radius:10px;font-size:12px}.error-banner.show{display:block}.dot-pulse{width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block;animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.35}}.bump{animation:bump .25s ease-out}@keyframes bump{50%{transform:translateY(-2px);text-shadow:0 0 16px #d8ff6766}}.skeleton-grid{display:none;columns:4 205px;column-gap:13px}.skeleton-grid.show{display:block}.skel-card{break-inside:avoid;margin-bottom:13px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}.skel-thumb{height:210px;background:linear-gradient(110deg,#24232c 25%,#302e39 38%,#24232c 55%);background-size:200% 100%;animation:shimmer 1.5s infinite}.skel-lines{padding:12px}.skel-line{height:8px;border-radius:8px;background:#33313d;margin-bottom:8px}.skel-line.w60{width:60%}.skel-line.w40{width:40%}@keyframes shimmer{to{background-position-x:-200%}}
+@media(min-width:1600px){.grid,.skeleton-grid{columns:5 210px}}@media(max-width:1250px){.sidebar{width:220px;padding-inline:13px}.main{margin-left:220px}.hero,.search-area,.content{padding-left:25px;padding-right:25px}#progressBar,.error-banner{margin-left:25px;margin-right:25px}.grid,.skeleton-grid{columns:3 200px}.filter-row{gap:6px}.country-select{min-width:125px}.stage-pills{gap:4px}.stage-pill{padding:7px 8px}}@media(max-width:900px){.sidebar{width:70px;padding:18px 8px}.brand-lockup{padding:0 8px 24px;justify-content:center}.brand-lockup>div:last-child,.nav-label,.side-divider,.side-label,.category-group-label,.category-btn .nav-label,.design-filter{display:none}.nav-btn,.category-btn{justify-content:center;padding:12px 7px}.nav-icon{font-size:18px}.main{margin-left:70px}.grid,.skeleton-grid{columns:2 190px}.hero,.search-area,.content{padding-left:20px;padding-right:20px}#progressBar,.error-banner{margin-left:20px;margin-right:20px}.filter-row{align-items:stretch}.sort-wrap{margin-left:0}.session-head{align-items:flex-start;flex-direction:column}.stage-pills{flex-wrap:wrap}.analysis-grid{gap:7px}.metric{padding:11px}.metric-label{font-size:8px}}@media(max-width:600px){.sidebar{position:sticky;top:0;inset:auto;width:100%;height:auto;display:block;padding:9px 12px;border-right:0;border-bottom:1px solid var(--line)}.brand-lockup{justify-content:flex-start;padding:0 5px 10px}.brand-lockup>div:last-child{display:block}.brand-name{font-size:21px}.brand-symbol{width:30px;height:30px;font-size:19px}.side-nav{display:flex;gap:5px}.nav-btn{flex:1;justify-content:center;padding:8px;font-size:11px}.nav-label{display:inline}.nav-icon{font-size:14px;width:auto}.side-divider,.side-label,.category-list,.design-filter{display:none}.main{margin-left:0}.topbar{display:none}.hero{padding:21px 17px 15px;min-height:0}.hero h1{font-size:35px;letter-spacing:-1px}.hero p{font-size:12px}.hero:after{font-size:145px;right:-45px;top:-40px}.search-area{padding:0 13px 15px}.search-row{flex-wrap:wrap;gap:7px}.search-box{flex-basis:100%;height:49px}.search-btn{padding:0 14px}.country-select{flex:1;height:42px}.filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.filter-row select,.filter-row button,#fBrand{width:100%;min-width:0}.sort-wrap{grid-column:1/-1;justify-content:flex-end}.status-hint{font-size:10px}.content{padding:0 13px 28px}.content-heading{margin-top:4px}.grid,.skeleton-grid{columns:2 140px;column-gap:8px}.card,.skel-card{margin-bottom:8px;border-radius:9px}.card-body{padding:8px}.brand-mark{width:23px;height:23px}.brand{font-size:10px}.cat{font-size:9px}.card-meta{font-size:8px;gap:4px;margin-top:7px}.save-float{width:29px;height:29px;top:7px;right:7px}.sel{top:12px;left:8px}.view-actions .download-label{display:none}#progressBar,.error-banner{margin:0 13px 15px;border-radius:12px}.session-head{padding:13px}.session-title{font-size:17px}.stage-pills{width:100%}.stage-pill{font-size:9px}.session-body{padding:14px}.stage-icon{width:34px;height:34px}.stage-text h3{font-size:12px}.stage-text p{font-size:10px}.stop-btn{padding:7px 9px;font-size:10px}.analysis-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:13px}.metric{padding:9px 8px}.metric-label{font-size:7px;letter-spacing:.03em}.metric-value{font-size:24px}.metric-sub{font-size:8px}.analysis-foot{font-size:8px}.collect-indeterminate{margin-left:0}.error-banner{font-size:11px}}
+
+/* Typography & breathing-room pass: prioritize readable hierarchy over dense UI */
+:root{--text-body:15px;--text-small:13px;--text-micro:11px}
+body{font-size:15px;line-height:1.55;letter-spacing:0}
+.brand-caption{font-size:11px;line-height:1.45}
+.side-label{font-size:11px;line-height:1.5}
+.nav-btn{font-size:14px;line-height:1.45;padding:12px 13px}
+.category-group-label{font-size:11px;margin-top:15px;margin-bottom:7px}
+.category-btn{font-size:13.5px;line-height:1.45;padding:10px 13px}
+.coming-soon{font-size:10px}
+.design-filter-head{font-size:13px}
+.design-filter p{font-size:12px;line-height:1.65}
+.switch-row{font-size:11px}
+.top-note{font-size:11px}
+.hero-kicker{font-size:11px;line-height:1.5}
+.hero p{font-size:14px;line-height:1.75;max-width:690px}
+.search-box input{font-size:15px}
+.search-btn{font-size:13px}
+.country-select{font-size:13px}
+.pill-select,.filter-btn,.sort-select,#fBrand{font-size:13px}
+.sort-wrap{font-size:12px}
+.status-hint{font-size:12px;line-height:1.65}
+.session-kicker{font-size:11px;line-height:1.5}
+.session-title{font-size:21px;line-height:1.35}
+.stage-pill{font-size:11px;padding:8px 11px}
+.stage-pill .stage-index{font-size:11px}
+.stage-text h3{font-size:15px;line-height:1.4}
+.stage-text p{font-size:13px;line-height:1.7}
+.stop-btn{font-size:12px;padding:10px 13px}
+.metric-label{font-size:10px;line-height:1.5}
+.metric-sub{font-size:11px;line-height:1.5}
+.analysis-foot{font-size:11px;line-height:1.5}
+.session-complete{font-size:12px;line-height:1.6}
+.result-summary strong,#resultCount{font-size:14px}
+.live-badge{font-size:11px}
+.grid,.skeleton-grid{column-gap:16px}
+.card{margin-bottom:16px;border-radius:14px}
+.card-body{padding:14px 15px 15px}
+.brand-mark{width:31px;height:31px;font-size:12px}
+.brand{font-size:13px;line-height:1.45}
+.cat{font-size:11.5px;line-height:1.45;margin-top:4px}
+.platform-mark{width:25px;height:25px;font-size:12px}
+.card-meta{font-size:10.5px;line-height:1.5;gap:7px;margin-top:12px}
+.rank-score{font-size:11px}
+.viewlink{font-size:12px;padding:8px 12px}
+.image-placeholder{font-size:13px;line-height:1.6}
+.image-placeholder small{font-size:11px}
+.empty{font-size:14px;line-height:1.8}
+.empty strong{font-size:24px;line-height:1.35}
+.empty button{font-size:12px}
+.error-banner{font-size:13px;line-height:1.6}
+@media(max-width:1250px){
+  .nav-btn{font-size:13.5px}
+  .category-btn{font-size:13px}
+}
+@media(max-width:900px){
+  .stage-pill{font-size:11px}
+  .metric-label{font-size:9px}
+}
+@media(max-width:600px){
+  body{font-size:14px}
+  .nav-btn{font-size:12px;padding:9px 7px}
+  .hero-kicker{font-size:10px}
+  .hero p{font-size:13px;line-height:1.7}
+  .search-box input{font-size:14px}
+  .search-btn{font-size:12px}
+  .country-select,.pill-select,.filter-btn,.sort-select,#fBrand{font-size:12px}
+  .status-hint{font-size:11.5px;line-height:1.6}
+  .grid,.skeleton-grid{column-gap:10px}
+  .card,.skel-card{margin-bottom:10px;border-radius:11px}
+  .card-body{padding:10px 10px 11px}
+  .brand-mark{width:25px;height:25px;font-size:11px}
+  .brand{font-size:11.5px;line-height:1.4}
+  .cat{font-size:10.5px;line-height:1.4}
+  .platform-mark{width:22px;height:22px;font-size:11px}
+  .card-meta{font-size:9.5px;line-height:1.45;gap:5px;margin-top:9px}
+  .rank-score{font-size:10px}
+  .session-title{font-size:19px}
+  .stage-pill{font-size:10px;padding:7px 8px}
+  .stage-text h3{font-size:13px}
+  .stage-text p{font-size:11.5px;line-height:1.6}
+  .metric-label{font-size:8px;line-height:1.4}
+  .metric-sub{font-size:9px}
+  .analysis-foot{font-size:9px}
+  .session-complete{font-size:11px}
+  .error-banner{font-size:12px}
+}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand-lockup"><span class="brand-symbol">✳</span><div><div class="brand-name">Creative Lens</div><div class="brand-caption">META AD LIBRARY · CREATIVE INTELLIGENCE</div></div></div>
+  <nav class="side-nav" aria-label="Main navigation">
+    <button class="nav-btn active" id="exploreBtn" onclick="showExplore()"><span class="nav-icon">⌂</span><span class="nav-label">Explore</span></button>
+    <button class="nav-btn" id="viewSavedBtn" onclick="toggleSavedView()"><span class="nav-icon">♧</span><span class="nav-label">Saved ads</span></button>
+    <button class="nav-btn nav-btn-soon" type="button" aria-disabled="true" title="Collections are coming soon. Use Saved ads to keep individual creatives for now." onclick="showCollections()"><span class="nav-icon">▱</span><span class="nav-label">Collections <small class="coming-soon">Soon</small></span></button>
+  </nav>
+  <div class="side-divider"></div>
+  <div class="side-label">Explore by industry</div>
+  <nav class="category-list" aria-label="Search categories">
+    <div class="category-group-label">Beauty & personal care</div>
+    <button class="category-btn" data-query="skincare" onclick="chooseCategory('skincare','Skincare')"><span class="nav-icon">◌</span><span class="nav-label">Skincare</span></button>
+    <button class="category-btn" data-query="beauty" onclick="chooseCategory('beauty','Beauty')"><span class="nav-icon">✳</span><span class="nav-label">Beauty & cosmetics</span></button>
+    <button class="category-btn" data-query="haircare" onclick="chooseCategory('haircare','Haircare')"><span class="nav-icon">⌁</span><span class="nav-label">Haircare</span></button>
+    <button class="category-btn" data-query="makeup" onclick="chooseCategory('makeup','Makeup')"><span class="nav-icon">◇</span><span class="nav-label">Makeup</span></button>
+    <button class="category-btn" data-query="fragrance" onclick="chooseCategory('fragrance','Fragrance')"><span class="nav-icon">♧</span><span class="nav-label">Fragrance</span></button>
+    <div class="category-group-label">Retail & lifestyle</div>
+    <button class="category-btn" data-query="fashion" onclick="chooseCategory('fashion','Fashion')"><span class="nav-icon">◇</span><span class="nav-label">Fashion & accessories</span></button>
+    <button class="category-btn" data-query="food and beverage" onclick="chooseCategory('food and beverage','Food & Beverage')"><span class="nav-icon">◒</span><span class="nav-label">Food & beverage</span></button>
+    <button class="category-btn" data-query="home decor" onclick="chooseCategory('home decor','Home & Living')"><span class="nav-icon">⌂</span><span class="nav-label">Home & living</span></button>
+    <button class="category-btn" data-query="electronics" onclick="chooseCategory('electronics','Electronics')"><span class="nav-icon">◉</span><span class="nav-label">Consumer electronics</span></button>
+    <div class="category-group-label">Other industries</div>
+    <button class="category-btn" data-query="supplements" onclick="chooseCategory('supplements','Supplements')"><span class="nav-icon">✚</span><span class="nav-label">Health & supplements</span></button>
+    <button class="category-btn" data-query="fitness" onclick="chooseCategory('fitness','Fitness')"><span class="nav-icon">↗</span><span class="nav-label">Fitness & sports</span></button>
+    <button class="category-btn" data-query="SaaS" onclick="chooseCategory('SaaS','SaaS & software')"><span class="nav-icon">⌘</span><span class="nav-label">SaaS & software</span></button>
+    <button class="category-btn" data-query="pet care" onclick="chooseCategory('pet care','Pet care')"><span class="nav-icon">♡</span><span class="nav-label">Pet care</span></button>
+    <button class="category-btn" data-query="travel" onclick="chooseCategory('travel','Travel & hospitality')"><span class="nav-icon">✦</span><span class="nav-label">Travel & hospitality</span></button>
+    <button class="category-btn" data-query="" onclick="chooseCategory('','All industries')"><span class="nav-icon">☷</span><span class="nav-label">All industries</span></button>
+  </nav>
+  <div class="sidebar-bottom"><div class="design-filter"><div class="design-filter-head"><span>✳</span> Design-led filter</div><p>Prioritise image creatives with stronger design signals.</p><div class="switch-row"><span id="designFilterLabel">Enabled</span><button id="designSwitch" class="switch active" aria-label="Toggle design-led filter" onclick="toggleDesignLed()"></button></div></div></div>
+</aside>
+<main class="main">
+  <div class="topbar"><span class="top-note">A WORKSPACE FOR CREATIVE RESEARCH</span><button class="icon-button" title="Toggle contrast" onclick="document.body.classList.toggle('contrast-mode')">◐</button><div class="avatar" aria-label="Creative Lens">CL</div></div>
+  <section class="hero"><div class="hero-kicker">Creative research, without the guesswork</div><h1>Find ads worth <em>looking at.</em></h1><p>Explore real Meta ad creatives by industry, discover visual directions, and save references for your next campaign.</p></section>
+  <section class="search-area" aria-label="Search and filters">
+    <div class="search-row"><div class="search-box"><span class="search-icon">⌕</span><input type="text" id="q" placeholder="Search an industry, brand, or campaign theme…" aria-label="Search ads"><button class="search-btn" id="searchBtn" onclick="submitSearch()">Search ↗</button></div><select class="country-select" id="fCountry" aria-label="Ad market"><option value="IN" selected>⌖ &nbsp; India market</option><option value="GB">United Kingdom</option><option value="US">United States</option><option value="">All available markets</option></select></div>
+    <div class="filter-row">
+      <select class="pill-select" id="fCategory" aria-label="Industry search"><option value="">Industry: Explore all</option><optgroup label="Beauty & personal care"><option value="skincare">Skincare</option><option value="beauty">Beauty & cosmetics</option><option value="haircare">Haircare</option><option value="makeup">Makeup</option><option value="fragrance">Fragrance</option></optgroup><optgroup label="Retail & lifestyle"><option value="fashion">Fashion & accessories</option><option value="food and beverage">Food & beverage</option><option value="home decor">Home & living</option><option value="electronics">Consumer electronics</option></optgroup><optgroup label="Other industries"><option value="supplements">Health & supplements</option><option value="fitness">Fitness & sports</option><option value="SaaS">SaaS & software</option><option value="pet care">Pet care</option><option value="travel">Travel & hospitality</option></optgroup></select>
+      <select class="pill-select" id="fPlatform" aria-label="Platform"><option value="">Any platform</option><option value="FACEBOOK">Facebook</option><option value="INSTAGRAM">Instagram</option></select>
+      <select class="pill-select" id="fMedia" aria-label="Media type"><option value="IMAGE" selected>Static images</option></select>
+      <select class="pill-select" id="fStatus" aria-label="Ad status"><option value="ACTIVE" selected>Active ads</option><option value="INACTIVE">Inactive ads</option><option value="">Any status</option></select>
+      <select class="pill-select" id="fDate" aria-label="Date range"><option value="">Any date</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select>
+      <input type="text" id="fBrand" placeholder="Brand filter" aria-label="Filter by brand">
+      <button id="fDesign" class="filter-btn active" onclick="toggleDesignLed()">✳ Design-led</button>
+      <div class="sort-wrap"><span>Sort</span><button id="fSort" class="sort-select" onclick="toggleSortMode()">Design score ↕</button></div>
+    </div>
+    <div class="status-hint">Choose an industry to start with a broad search, or enter a <strong>brand, product category, or campaign theme</strong>. You can edit the search phrase before running it.</div>
+  </section>
+  <div class="error-banner" id="errorBanner" role="status"></div>
+  <section id="progressBar" aria-live="polite">
+    <div class="session-head"><div><div class="session-kicker">Live search session</div><div class="session-title" id="sessionTitle">Finding relevant creative</div></div><div class="stage-pills"><div class="stage-pill active" id="collectStage"><span class="stage-dot"></span><span class="stage-index">01</span> Collection</div><div class="stage-pill" id="analysisStage"><span class="stage-dot"></span><span class="stage-index">02</span> Analysis</div></div></div>
+    <div class="session-body">
+      <div class="stage-copy"><div class="stage-icon" id="stageIcon">⌕</div><div class="stage-text"><h3 id="progressTitle">Collecting ads from Meta Ad Library</h3><p id="progressText">Searching the selected market and gathering eligible static image creatives. Analysis begins when collection finishes.</p></div><button class="stop-btn" id="stopBtn" onclick="stopCurrentScrape()">■ Stop search</button></div>
+      <div class="collect-indeterminate" id="collectTrack"></div>
+      <div class="analysis-grid" id="analysisGrid">
+        <div class="metric"><div class="metric-label">Ads collected</div><div class="metric-value" id="collectedNum">0</div><div class="metric-sub">Returned by Meta</div></div>
+        <div class="metric"><div class="metric-label">Ads analyzed</div><div class="metric-value lime" id="analyzedNum">0</div><div class="metric-sub" id="analyzedSub">Preparing analysis</div></div>
+        <div class="metric"><div class="metric-label">Unique creatives</div><div class="metric-value" id="matchesNum">0</div><div class="metric-sub">After duplicate grouping and filters</div></div>
+      </div>
+      <div class="analysis-track" id="analysisTrack" hidden><div class="analysis-track-fill" id="analysisFill"></div></div>
+      <div class="analysis-foot" id="analysisFoot" hidden><span id="analysisFootLeft">ANALYSIS IN PROGRESS</span><strong id="analysisPct">0%</strong></div>
+    </div>
+    <div class="session-complete" id="sessionComplete">✓ Search complete. Your results are ready to explore.</div>
+  </section>
+  <section class="content">
+    <div class="content-heading"><div class="result-summary"><strong id="resultCount">Choose an industry to begin</strong><span class="live-badge"><span class="dot"></span> Session results</span></div><div class="view-actions"><button class="view-toggle active" title="Masonry gallery">▦</button><button class="view-toggle" title="List view" onclick="alert('List view is not available yet.')">☷</button><button class="filter-btn" onclick="downloadSelected()">↓ <span class="download-label">Download selected</span></button></div></div>
+    <div class="skeleton-grid" id="skeletonGrid"></div><div class="grid" id="grid"></div><div class="empty" id="emptyMsg"><strong>No creatives to show yet</strong>Start a search to collect ads, or broaden your search phrase. Results will appear here as analysis completes.<br><button onclick="document.getElementById('q').focus()">Edit search phrase</button></div>
+  </section>
+</main>
+</div>
+<script>
+let allCreatives=[];let savedCreatives=[];let selectedIds=new Set();let showSavedOnly=false;let designLedOnly=true;let sortMode='rank';let pollTimer=null;let currentScrapeTarget=null;let lastSearchQuery='';let currentStage='idle';let loadRequestId=0;let pollGeneration=0;
+const $=id=>document.getElementById(id);
+function showError(message){$('errorBanner').textContent=message;$('errorBanner').classList.add('show')}
+function clearError(){$('errorBanner').classList.remove('show');$('errorBanner').textContent=''}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function chooseCategory(query,label){document.querySelectorAll('.category-btn').forEach(b=>b.classList.toggle('active',b.dataset.query===query));$('fCategory').value=query;$('q').value=query;showExplore();if(query)submitSearch();else loadCreatives('')}
+function submitSearch(){const selectedCategory=$('fCategory').value;const q=$('q').value.trim()||selectedCategory;if(!q){showError('Choose an industry or enter a search phrase first.');$('q').focus();return} $('q').value=q;if(q!==selectedCategory)$('fCategory').value='';document.querySelectorAll('.category-btn').forEach(b=>b.classList.toggle('active',b.dataset.query===q));loadCreatives(q)}
+async function loadCreatives(typedSearch){
+  const requestId=++loadRequestId;
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=null;pollGeneration++;currentScrapeTarget=null;hideSkeletons();
+  clearError();
+  const params=new URLSearchParams();
+  const cat=typeof typedSearch==='string'?typedSearch:$('fCategory').value;
+  const country=$('fCountry').value;
+  const platform=$('fPlatform').value,media=$('fMedia').value,status=$('fStatus').value,days=$('fDate').value,brand=$('fBrand').value.trim();
+  if(cat)params.set('category',cat);if(country)params.set('country',country);if(platform)params.set('platform',platform);if(media)params.set('media_type',media);if(status)params.set('status',status);if(days)params.set('days',days);if(brand)params.set('brand',brand);params.set('design_led_only',designLedOnly?'true':'false');
+  $('resultCount').textContent='Loading creatives…';
+  try{
+    const res=await fetch('/api/creatives?'+params.toString());
+    if(!res.ok)throw new Error('The server returned '+res.status);
+    const data=await res.json();
+    if(requestId!==loadRequestId)return;
+    allCreatives=data.rows||[];lastSearchQuery=cat||'';applySearchAndRender();
+    if(data.on_demand_scraped&&data.scrape_target){
+      pollScrapeProgress(data.scrape_target.category,data.scrape_target.country);
+    }else if(cat){
+      const statusRes=await fetch(`/api/scrape-status?category=${encodeURIComponent(cat)}&country=${encodeURIComponent(country)}&design_led_only=${designLedOnly?'true':'false'}`);
+      const p=await statusRes.json();
+      if(requestId!==loadRequestId)return;
+      if(['collecting','starting','analyzing'].includes(p.stage))pollScrapeProgress(cat,country);
+      else {setProgressSnapshot(p);setStage(p.stage==='idle'?'idle':p.stage);hideSkeletons()}
+    }else{
+      setStage('idle');resetProgressMetrics();$('progressBar').classList.remove('show');hideSkeletons();
+    }
+  }catch(e){
+    if(requestId===loadRequestId){showError('Could not load creatives. Check that the dashboard server is running, then try again.');$('resultCount').textContent='Results unavailable';hideSkeletons()}
+  }
+}
+function resetProgressMetrics(){animateMetric('collectedNum',0);animateMetric('analyzedNum',0);animateMetric('matchesNum',0);$('analyzedSub').textContent='Waiting for collection';$('analysisFill').style.width='0%';$('analysisPct').textContent='0%';$('analysisFootLeft').textContent='READY TO SEARCH'}
+function setProgressSnapshot(p){
+  const total=Number(p.total||0),done=Number(p.done||0),collected=Number(p.collected??(p.stage==='done'||p.stage==='stopped'?total:0));
+  animateMetric('collectedNum',collected);animateMetric('analyzedNum',done);animateMetric('matchesNum',Number(p.matches||0));
+  $('analyzedSub').textContent=`${done} of ${total} processed`;
+  const pct=total>0?Math.min(100,Math.round(done/total*100)):((p.stage==='done'||p.stage==='stopped')?100:0);
+  $('analysisFill').style.width=pct+'%';$('analysisPct').textContent=pct+'%';
+  $('analysisFootLeft').textContent=p.stage==='done'?'ANALYSIS COMPLETE':p.stage==='stopped'?'ANALYSIS STOPPED':p.stage==='analyzing'?'ANALYSIS IN PROGRESS':'READY TO SEARCH';
+}
+
+function buildSkeletonCards(n){$('skeletonGrid').innerHTML=Array.from({length:n},()=>'<div class="skel-card"><div class="skel-thumb"></div><div class="skel-lines"><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>').join('')}
+function showSkeletons(){buildSkeletonCards(8);$('skeletonGrid').classList.add('show')}
+function hideSkeletons(){$('skeletonGrid').classList.remove('show')}
+function stopCurrentScrape(){if(!currentScrapeTarget)return;$('stopBtn').disabled=true;$('stopBtn').textContent='Stopping…';fetch(`/api/stop-scrape?category=${encodeURIComponent(currentScrapeTarget.category)}&country=${encodeURIComponent(currentScrapeTarget.country)}`,{method:'POST'}).catch(()=>{})}
+function setStage(stage){
+  currentStage=stage;
+  const collecting=stage==='starting'||stage==='collecting',analyzing=stage==='analyzing',idle=stage==='idle';
+  $('collectStage').classList.toggle('active',collecting);$('collectStage').classList.toggle('complete',analyzing||stage==='done'||stage==='stopped');
+  $('analysisStage').classList.toggle('active',analyzing);$('analysisStage').classList.toggle('complete',stage==='done');
+  $('collectTrack').style.display=collecting?'block':'none';
+  $('analysisGrid').classList.toggle('show',analyzing||stage==='done'||stage==='stopped');
+  $('analysisTrack').hidden=!(analyzing||stage==='done'||stage==='stopped');$('analysisFoot').hidden=!(analyzing||stage==='done'||stage==='stopped');
+  $('stageIcon').textContent=collecting?'⌕':idle?'＋':'✳';
+  $('progressTitle').textContent=idle?'Ready to discover':collecting?'Collecting ads from Meta Ad Library':analyzing?'Analyzing creative quality':stage==='failed'?'Search could not finish':'Search complete';
+  $('sessionTitle').textContent=idle?'Choose a category or enter a search':collecting?'Finding relevant creative':analyzing?'Evaluating the creative':stage==='failed'?'Search interrupted':'Your creative results';
+  $('progressText').textContent=idle?'Your results and search progress will appear here.':collecting?'Searching the selected market and gathering eligible static image creatives. Analysis begins when collection finishes.':analyzing?'The collector has finished. The model is now evaluating each creative and ranking design-led matches.':stage==='failed'?'The search could not finish. Check the server message and try again.':'The search has finished. Revisit this category to see the results already collected in this session.';
+  $('sessionComplete').classList.toggle('show',['done','stopped'].includes(stage));$('stopBtn').style.display=collecting||analyzing?'inline-block':'none';$('stopBtn').disabled=false;$('stopBtn').textContent='■ Stop search';
+  if(idle){$('progressBar').classList.remove('show');resetProgressMetrics()}
+}
+function animateMetric(id,value){const el=$(id);const n=Math.max(0,Number(value)||0);if(el.textContent!==String(n)){el.textContent=n;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}}
+async function refreshResultsQuietly(category,country){
+  const expectedQuery=String(category||'').toLowerCase();
+  const params=new URLSearchParams();if(category)params.set('category',category);if(country)params.set('country',country);
+  const platform=$('fPlatform').value,media=$('fMedia').value,status=$('fStatus').value,days=$('fDate').value,brand=$('fBrand').value.trim();
+  if(platform)params.set('platform',platform);if(media)params.set('media_type',media);if(status)params.set('status',status);if(days)params.set('days',days);if(brand)params.set('brand',brand);params.set('design_led_only',designLedOnly?'true':'false');
+  try{const res=await fetch('/api/creatives?'+params.toString());const data=await res.json();if(String(lastSearchQuery||'').toLowerCase()!==expectedQuery||$('fCountry').value!==country)return;allCreatives=data.rows||[];applySearchAndRender()}catch(e){}
+}
+function pollScrapeProgress(category,country){
+  if(pollTimer)clearInterval(pollTimer);
+  const pollId=++pollGeneration;
+  currentScrapeTarget={category,country};$('progressBar').classList.add('show');setStage('starting');showSkeletons();
+  let attempts=0;
+  const isCurrent=()=>pollId===pollGeneration&&lastSearchQuery.toLowerCase()===String(category||'').toLowerCase()&&$('fCountry').value===country;
+  const finish=async(stage,message)=>{
+    if(!isCurrent())return;
+    if(pollTimer)clearInterval(pollTimer);pollTimer=null;setStage(stage);$('progressText').textContent=message;currentScrapeTarget=null;
+    await refreshResultsQuietly(category,country);hideSkeletons();
+  };
+  pollTimer=setInterval(async()=>{
+    if(!isCurrent()){clearInterval(pollTimer);pollTimer=null;return}
+    if(++attempts>900){clearInterval(pollTimer);pollTimer=null;$('progressText').textContent='Progress updates timed out. The server may still be working; revisit this category to check results.';$('stopBtn').style.display='none';currentScrapeTarget=null;hideSkeletons();return}
+    try{
+      const statusParams=new URLSearchParams({category:category||'',country:country||'',design_led_only:designLedOnly?'true':'false'});
+      [['platform','fPlatform'],['media_type','fMedia'],['status','fStatus'],['days','fDate'],['brand','fBrand']].forEach(([key,id])=>{const value=$(id).value;if(value)statusParams.set(key,value)});
+      const res=await fetch('/api/scrape-status?'+statusParams.toString());const p=await res.json();if(!isCurrent())return;
+      if(p.stage==='collecting'||p.stage==='starting')setStage(p.stage);
+      else if(p.stage==='analyzing'){
+        setStage('analyzing');setProgressSnapshot(p);$('analysisFootLeft').textContent='ANALYSIS IN PROGRESS';await refreshResultsQuietly(category,country);
+      }else if(p.stage==='done'){
+        setProgressSnapshot(p);await finish('done','Collection and analysis are complete. Revisit this category to see these session results without starting another search.');
+      }else if(p.stage==='stopped'){
+        setProgressSnapshot(p);await finish('stopped','Search stopped by request. Showing the creatives processed so far.');
+      }else if(p.stage==='failed'){
+        await finish('failed','The search could not finish. Check the server terminal for details.');showError('This search did not finish. You can retry it.');
+      }else if(p.stage==='idle'&&attempts>3){clearInterval(pollTimer);pollTimer=null;currentScrapeTarget=null;setStage('idle');hideSkeletons()}
+    }catch(e){/* transient polling issue; retry next interval */}
+  },1200);
+}
+
+function applySearchAndRender(){if(!showSavedOnly){$('emptyMsg').innerHTML=`<strong>No creatives to show yet</strong>Start a search to collect ads, or broaden your search phrase. Results will appear here as analysis completes.<br><button onclick="document.getElementById('q').focus()">Edit search phrase</button>`;}let rows=showSavedOnly?savedCreatives:allCreatives;const q=$('q').value.trim().toLowerCase();if(!showSavedOnly&&q&&q!==lastSearchQuery)rows=rows.filter(r=>[r.brand,r.category,r.body,r.title].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(showSavedOnly&&$('resultCount'))$('resultCount').textContent=rows.length+' saved creative'+(rows.length===1?'':'s');if(sortMode==='longevity')rows=[...rows].sort((a,b)=>(daysRunning(b.first_seen_at)??-1)-(daysRunning(a.first_seen_at)??-1));else rows=[...rows].sort((a,b)=>Number(b.rank_score||0)-Number(a.rank_score||0));renderGrid(rows)}
+function toggleSortMode(){sortMode=sortMode==='rank'?'longevity':'rank';$('fSort').textContent=sortMode==='rank'?'Design score ↕':'Longest running ↕';applySearchAndRender()}
+function imageFailed(img){const fallback=document.createElement('div');fallback.className='image-placeholder';const title=document.createElement('span');title.textContent='Preview unavailable';const note=document.createElement('small');note.textContent='The image link may have expired. Open the ad on Meta to view it.';fallback.append(title,note);img.replaceWith(fallback)}
+function daysRunning(value){if(!value)return null;const date=new Date(value.replace(' ','T'));const days=Math.floor((Date.now()-date.getTime())/86400000);return days>=0?days:null}
+let seenCardHashes=new Set();function renderGrid(rows){const grid=$('grid');const empty=$('emptyMsg');$('resultCount').textContent=rows.length+' creative'+(rows.length===1?'':'s');if(!rows.length){grid.innerHTML='';empty.style.display='block';return}empty.style.display='none';grid.innerHTML=rows.map(r=>{const adLink=r.ad_id?`https://www.facebook.com/ads/library/?id=${encodeURIComponent(r.ad_id)}`:'';const days=daysRunning(r.first_seen_at);const daysLabel=days===null?'':days===0?'Seen today':`${days}d running`;const platform=String(r.platform||'').toLowerCase().includes('insta')?'◎':'f';const hash=String(r.image_hash||'');const saved=!!r.is_saved;return `<article class="card"><div class="creative-media"><input type="checkbox" class="sel" aria-label="Select creative" data-hash="${escapeHtml(hash)}" onchange="toggleSelect('${escapeHtml(hash)}',this.checked)"><button class="save-float ${saved?'saved':''}" aria-label="${saved?'Remove saved ad':'Save ad'}" title="${saved?'Remove saved ad':'Save ad'}" onclick="toggleSave('${escapeHtml(hash)}',${saved})">${saved?'★':'♧'}</button>${r.image_url?`<img src="${escapeHtml(r.image_url)}" alt="${escapeHtml((r.brand||'')+' ad creative')}" loading="lazy" onerror="imageFailed(this)">`:'<div class="image-placeholder"><span>Preview unavailable</span><small>No image URL was returned for this creative.</small></div>'}<div class="card-hover-actions">${adLink?`<a class="viewlink" href="${adLink}" target="_blank" rel="noopener">View on Meta ↗</a>`:''}</div></div><div class="card-body"><div class="brand-row"><span class="brand-mark">${escapeHtml((r.brand||'•').trim().charAt(0).toUpperCase())}</span><div class="brand-info"><div class="brand">${escapeHtml(r.brand||'Unknown advertiser')}</div><div class="cat">${escapeHtml(r.category||'Creative')}</div></div><span class="platform-mark">${platform}</span></div><div class="card-meta"><span class="quality-dot"></span><span>Design-led</span>${daysLabel?`<span class="meta-separator">·</span><span>${daysLabel}</span>`:''}<span class="rank-score">${Math.round(Number(r.rank_score||0)*100)}%</span></div></div></article>`}).join('')}
+function toggleSelect(hash,checked){if(checked)selectedIds.add(hash);else selectedIds.delete(hash)}
+async function toggleSave(hash,isSaved){try{const res=await fetch('/api/save/'+encodeURIComponent(hash),{method:isSaved?'DELETE':'POST'});if(!res.ok)throw new Error();const row=allCreatives.find(r=>r.image_hash===hash);if(row)row.is_saved=!isSaved;if(isSaved)savedCreatives=savedCreatives.filter(r=>r.image_hash!==hash);else if(row&&!savedCreatives.some(r=>r.image_hash===hash))savedCreatives.unshift({...row,is_saved:true});if(showSavedOnly)await loadSavedCreatives();else applySearchAndRender()}catch(e){showError('Could not update saved ads. Please try again.') }}
+async function loadSavedCreatives(){try{const res=await fetch('/api/saved');if(!res.ok)throw new Error('Saved ads could not be loaded');const data=await res.json();savedCreatives=data.rows||[];allCreatives=savedCreatives;applySearchAndRender();if(!savedCreatives.length){$('emptyMsg').innerHTML='<strong>No saved ads yet</strong>Save individual creatives from Explore and they will stay here, even after you restart Creative Lens.';$('emptyMsg').style.display='block'} }catch(e){showError('Could not load saved ads. Check the dashboard server and try again.')}}
+async function toggleSavedView(){showSavedOnly=!showSavedOnly;$('viewSavedBtn').classList.toggle('active',showSavedOnly);$('exploreBtn').classList.toggle('active',!showSavedOnly);if(showSavedOnly){if(pollTimer)clearInterval(pollTimer);pollTimer=null;currentScrapeTarget=null;hideSkeletons();$('progressBar').classList.remove('show');$('resultCount').textContent='Loading saved ads…';await loadSavedCreatives()}else{loadCreatives(lastSearchQuery)}}
+function showExplore(){if(showSavedOnly){showSavedOnly=false;$('viewSavedBtn').classList.remove('active');$('exploreBtn').classList.add('active');loadCreatives(lastSearchQuery);return}showSavedOnly=false;$('viewSavedBtn').classList.remove('active');$('exploreBtn').classList.add('active');applySearchAndRender()}
+function showCollections(){showError('Collections are coming soon. For now, use Saved ads to keep individual creatives.')}
+function toggleDesignLed(){designLedOnly=!designLedOnly;$('fDesign').classList.toggle('active',designLedOnly);$('designSwitch').classList.toggle('active',designLedOnly);$('designFilterLabel').textContent=designLedOnly?'Enabled':'All creatives';loadCreatives(lastSearchQuery)}
+function downloadSelected(){if(!selectedIds.size){showError('Select one or more creatives using the checkbox on each card first.');return}const rows=allCreatives.filter(r=>selectedIds.has(r.image_hash));const cols=['brand','category','country','platform','media_type','status','rank_score','image_url','ad_id','body'];const esc=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const lines=[cols.join(','),...rows.map(r=>cols.map(c=>esc(r[c])).join(','))];const blob=new Blob([lines.join('\n')],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='creative-lens-selected-ads.csv';a.click();URL.revokeObjectURL(url)}
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')submitSearch()});$('fCategory').addEventListener('change',()=>{const value=$('fCategory').value;$('q').value=value;if(value)submitSearch()});['fCountry','fPlatform','fMedia','fStatus','fDate','fBrand'].forEach(id=>$(id).addEventListener('change',()=>loadCreatives(lastSearchQuery)));$('q').addEventListener('input',()=>{if(!currentScrapeTarget)applySearchAndRender()});window.addEventListener('beforeunload',()=>{if(pollTimer)clearInterval(pollTimer)});
+// Start quietly: do not trigger a broad scrape until the user chooses a search.
+$('resultCount').textContent='Choose an industry or search phrase to begin';$('emptyMsg').style.display='block';$('grid').style.display='block';
+</script>
+</body>
+</html>

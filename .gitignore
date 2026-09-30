@@ -1,0 +1,20 @@
+# Python environments and cache
+.venv/
+.venv313/
+__pycache__/
+*.py[cod]
+
+# Local databases and generated data
+*.db
+bulk_output/
+FINAL_SELECTED_IMAGES/
+csv/
+hide/
+
+# Local datasets
+vitamins_dec.csv
+filtered_design_ads_selected.csv
+
+# Secrets
+.env
+.env.*

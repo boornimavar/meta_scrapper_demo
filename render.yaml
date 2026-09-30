@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: creative-lens
+    runtime: docker
+    plan: starter
+    region: singapore
+    healthCheckPath: /
+    autoDeploy: true
+    disk:
+      name: creative-lens-data
+      mountPath: /var/data
+      sizeGB: 2

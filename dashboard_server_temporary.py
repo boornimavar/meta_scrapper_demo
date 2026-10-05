@@ -9,7 +9,7 @@ genuinely runs out of new content (internally capped at a generous 500
 per search, which costs nothing extra to request - Meta just returns
 whatever's really available either way).
 
-Run with:  python dashboard_server.py
+Run with:  python dashboard_server_temporary.py
 Then open: http://127.0.0.1:5000
 """
 import sqlite3

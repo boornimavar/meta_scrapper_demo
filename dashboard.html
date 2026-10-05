@@ -215,7 +215,7 @@ async function loadCreatives(typedSearch,opts={}){
       if(requestId!==loadRequestId)return;
       if(['collecting','starting','analyzing'].includes(p.stage))pollScrapeProgress(cat,country);
       else if(p.stage==='failed'){$('progressBar').classList.add('show');setStage('failed');$('progressText').textContent=describeFailure(p);showError(describeFailure(p));hideSkeletons()}
-      else {setProgressSnapshot(p);setStage(p.stage==='idle'?'idle':p.stage);hideSkeletons()}
+      else {setProgressSnapshot(p);setStage(p.stage==='idle'?'idle':p.stage);if(p.warning){$('progressText').textContent=p.warning;showError(p.warning)}hideSkeletons()}
     }else{
       setStage('idle');resetProgressMetrics();$('progressBar').classList.remove('show');hideSkeletons();
     }
@@ -282,7 +282,7 @@ function pollScrapeProgress(category,country){
       else if(p.stage==='analyzing'){
         setStage('analyzing');setProgressSnapshot(p);$('analysisFootLeft').textContent='ANALYSIS IN PROGRESS';await refreshResultsQuietly(category,country);
       }else if(p.stage==='done'){
-        setProgressSnapshot(p);await finish('done','Collection and analysis are complete. Revisit this category to see these session results without starting another search.');
+        setProgressSnapshot(p);await finish('done',p.warning||'Collection and analysis are complete. Revisit this category to see these session results without starting another search.');if(p.warning)showError(p.warning);
       }else if(p.stage==='stopped'){
         setProgressSnapshot(p);await finish('stopped','Search stopped by request. Showing the creatives processed so far.');
       }else if(p.stage==='failed'){

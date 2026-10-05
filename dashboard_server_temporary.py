@@ -42,6 +42,8 @@ if not SESSION_DB_PATH.exists():
 STALE_AFTER_HOURS = 48
 SCRAPE_REQUEST_SIZE = 500  # always ask Meta for a generous amount - costs nothing extra,
                            # since Meta only ever returns what's genuinely available anyway
+SCRAPE_PAGE_SIZE = 30  # ads per request to Meta (collector max ~30); fewer requests per search
+                       # means less chance of being rate-limited before collection finishes
 
 _scrapes_in_progress = set()
 _scrapes_lock = threading.Lock()
@@ -67,6 +69,12 @@ FAILURE_MESSAGES = {
     "rate_limited": "Meta is rate-limiting searches from this network. Wait a while - ideally a few hours - before searching again.",
     "no_response": "Meta stopped responding on this network. Try again later or from a different connection.",
     "error": "The search could not finish. Check the server terminal for details.",
+}
+# Meta cut collection off partway; the ads collected before that are still shown.
+PARTIAL_MESSAGES = {
+    "rate_limited": "Meta started rate-limiting this network after {n} ads, so the search stopped early. Showing what was collected.",
+    "no_response": "Meta stopped responding after {n} ads, so the search stopped early. Showing what was collected.",
+    "error": "The search stopped early after {n} ads because of an error. Showing what was collected.",
 }
 
 _failures = {}  # target -> {"reason", "failed_at"}; guarded by _progress_lock
@@ -233,7 +241,7 @@ def run_on_demand_scrape(category, country, stop_event):
         search_status="ACTIVE",
         search_type="KEYWORD_UNORDERED",
         search_max_results=SCRAPE_REQUEST_SIZE,
-        search_page_size=10,
+        search_page_size=SCRAPE_PAGE_SIZE,
         search_media_type="IMAGE",
         platforms=None,
         search_start_date=None,
@@ -243,8 +251,16 @@ def run_on_demand_scrape(category, country, stop_event):
         search_sort_by=None,
     )
     failure_reason = None
+    interrupted_reason = []  # set when Meta cut collection off but some ads were kept
+
+    def on_interrupted(exc):
+        interrupted_reason.append(classify_failure(exc))
+
     try:
-        run_broad_search_pipeline(args, progress_callback=on_progress, stop_check=stop_event.is_set, db_path=SESSION_DB_PATH, save_run_artifacts=False)
+        run_broad_search_pipeline(
+            args, progress_callback=on_progress, stop_check=stop_event.is_set, db_path=SESSION_DB_PATH,
+            save_run_artifacts=False, on_collection_interrupted=on_interrupted,
+        )
     except Exception as exc:
         failure_reason = classify_failure(exc)
         print(f"[ON-DEMAND] Scrape failed ({failure_reason}): {exc}")
@@ -261,6 +277,8 @@ def run_on_demand_scrape(category, country, stop_event):
                     current.setdefault("done", 0)
                     current.setdefault("total", 0)
                     current.setdefault("collected", current.get("total", 0))
+                    if interrupted_reason:
+                        current["warning"] = PARTIAL_MESSAGES[interrupted_reason[0]].format(n=current.get("collected", 0))
                     _scrape_progress[target] = current
         # The target stays "searched" even when it failed, so refreshing the
         # gallery never silently starts another search. Retrying is explicit.

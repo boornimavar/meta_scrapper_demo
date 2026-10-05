@@ -175,6 +175,26 @@ def test_stalled_collection_is_failed_by_watchdog(client, app_env, fake_pipeline
     assert client.get(f"/api/scrape-status?{QUERY}").get_json()["stage"] == "failed"
 
 
+def test_rate_limited_partway_keeps_collected_results(client, fake_pipeline):
+    fake_pipeline["behaviour"] = "partial"
+    fake_pipeline["rows"] = [make_row(image_hash=f"efef00000000000{i}") for i in range(4)]
+    client.get(f"/api/creatives?{QUERY}")
+
+    status = wait_for_stage(client, QUERY, {"done", "failed"})
+
+    assert status["stage"] == "done"
+    assert "rate-limiting" in status["warning"] and "4 ads" in status["warning"]
+    rows = client.get(f"/api/creatives?{QUERY}").get_json()["rows"]
+    assert len(rows) == 4
+
+
+def test_search_requests_30_ads_per_page(client, fake_pipeline):
+    client.get(f"/api/creatives?{QUERY}")
+    wait_for_stage(client, QUERY, {"done"})
+
+    assert fake_pipeline["page_size"] == 30
+
+
 def test_collection_progress_reports_ads_collected(client, fake_pipeline):
     fake_pipeline["rows"] = [make_row(image_hash=f"cdcd00000000000{i}") for i in range(3)]
     client.get(f"/api/creatives?{QUERY}")

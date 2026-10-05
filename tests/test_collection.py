@@ -12,17 +12,46 @@ def fake_ad(i):
 
 
 class FakeCollector:
-    """Stands in for MetaAdsCollector; never touches the network."""
+    """Stands in for MetaAdsCollector; never touches the network.
 
-    def __init__(self, ads):
+    With `fail_with`, the search raises that error after yielding `ads`,
+    like the real collector does when Meta rate-limits partway through.
+    """
+
+    def __init__(self, ads, fail_with=None):
         self.ads = ads
+        self.fail_with = fail_with
 
     def search(self, **kwargs):
         yield from self.ads
+        if self.fail_with:
+            raise self.fail_with
 
 
-def use_fake_collector(monkeypatch, ads):
-    monkeypatch.setattr(scraper, "MetaAdsCollector", lambda: FakeCollector(ads))
+def use_fake_collector(monkeypatch, ads, fail_with=None):
+    monkeypatch.setattr(scraper, "MetaAdsCollector", lambda: FakeCollector(ads, fail_with))
+
+
+def test_rate_limit_partway_keeps_collected_ads(monkeypatch):
+    error = RuntimeError("Max retries exceeded due to rate limiting")
+    use_fake_collector(monkeypatch, [fake_ad(i) for i in range(3)], fail_with=error)
+    interrupted = []
+
+    records = scraper.search_ads_broad(query="beauty", static_only=True, on_interrupted=interrupted.append)
+
+    assert len(records) == 3
+    assert interrupted == [error]
+
+
+def test_error_before_any_ad_is_raised(monkeypatch):
+    use_fake_collector(monkeypatch, [], fail_with=RuntimeError("Max retries exceeded due to rate limiting"))
+
+    try:
+        scraper.search_ads_broad(query="beauty", static_only=True)
+    except RuntimeError as exc:
+        assert "rate limiting" in str(exc)
+    else:
+        raise AssertionError("expected the collector error to be raised")
 
 
 def test_on_collect_reports_each_ad(monkeypatch):

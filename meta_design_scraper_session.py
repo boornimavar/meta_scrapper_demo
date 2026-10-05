@@ -1308,6 +1308,7 @@ def search_ads_broad(
     sort_by=None,
     on_collect=None,
     stop_check=None,
+    on_interrupted=None,
 ):
     """
     Broad Meta Ad Library acquisition for the future internal app.
@@ -1322,6 +1323,10 @@ def search_ads_broad(
     show live collection progress and notice when Meta stops responding.
     stop_check() is checked before each ad; when it returns True collection
     ends early and the creatives gathered so far are returned.
+
+    If Meta cuts collection off partway (rate limiting, timeouts), the
+    creatives gathered so far are returned and on_interrupted(exc) is called,
+    rather than discarding them. With nothing collected the error is raised.
     """
     collector = MetaAdsCollector()
 
@@ -1372,8 +1377,15 @@ def search_ads_broad(
 
     records = []
     ad_count = 0
+    interruption = []
 
-    for ad in ads:
+    def until_interrupted(stream):
+        try:
+            yield from stream
+        except Exception as exc:
+            interruption.append(exc)
+
+    for ad in until_interrupted(ads):
         if stop_check is not None and stop_check():
             print(f"\n[STOPPED] Collection ended early after {ad_count} ad(s).")
             break
@@ -1455,6 +1467,14 @@ def search_ads_broad(
                 "ad_type": clean_text(get_attr(ad, "ad_type", default="")),
                 "categories": clean_text(get_attr(ad, "categories", default=[])),
             })
+
+    if interruption:
+        if not records:
+            raise interruption[0]
+        print(f"\n[INTERRUPTED] Meta stopped the search after {ad_count} ad(s): {interruption[0]}")
+        print("              Keeping the creatives collected so far.")
+        if on_interrupted is not None:
+            on_interrupted(interruption[0])
 
     print(f"\nAds received:      {ad_count}")
     if static_only:
@@ -1648,7 +1668,8 @@ def deduplicate_analyzed_rows(analyzed_rows):
     return representatives, duplicate_count, groups
 
 
-def run_broad_search_pipeline(args, progress_callback=None, stop_check=None, db_path=None, save_run_artifacts=True):
+def run_broad_search_pipeline(args, progress_callback=None, stop_check=None, db_path=None, save_run_artifacts=True,
+                              on_collection_interrupted=None):
     """Acquire broad ads, run the existing image intelligence, deduplicate, and build review output."""
     from datetime import datetime
 
@@ -1682,6 +1703,7 @@ def run_broad_search_pipeline(args, progress_callback=None, stop_check=None, db_
         sort_by=getattr(args, "search_sort_by", None),
         on_collect=(lambda n: progress_callback(n, 0, stage="collecting")) if progress_callback else None,
         stop_check=stop_check,
+        on_interrupted=on_collection_interrupted,
     )
 
     if stop_check is not None and stop_check():

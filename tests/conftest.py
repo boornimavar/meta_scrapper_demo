@@ -111,8 +111,19 @@ def fake_pipeline(monkeypatch):
         "timeout": "Failed to perform, curl: (28) Operation timed out after 450847 milliseconds with 0 bytes received.",
     }
 
-    def fake(args, progress_callback=None, stop_check=None, db_path=None, save_run_artifacts=True):
+    def fake(args, progress_callback=None, stop_check=None, db_path=None, save_run_artifacts=True,
+             on_collection_interrupted=None):
         state["calls"].append(args.search_query)
+        state["page_size"] = args.search_page_size
+        if state["behaviour"] == "partial":
+            # Meta rate-limits partway: the rows collected so far are still analyzed.
+            for n in range(1, len(state["rows"]) + 1):
+                progress_callback(n, 0, "collecting")
+            on_collection_interrupted(RuntimeError(errors["rate_limited"]))
+            progress_callback(0, len(state["rows"]), "analyzing")
+            insert_rows(db_path, state["rows"])
+            progress_callback(len(state["rows"]), len(state["rows"]), "done")
+            return
         if state["behaviour"] in errors:
             raise RuntimeError(errors[state["behaviour"]])
         if state["behaviour"] == "wait":

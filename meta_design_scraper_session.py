@@ -26,6 +26,8 @@ import torch
 import clip
 import pytesseract
 from meta_ads_collector import MetaAdsCollector, FilterConfig
+# import meta_ads_collector.client as _mac_client
+# _mac_client.DOC_ID_SEARCH = "24922295957467452"  # Meta changed this on/before Oct 2026
 if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"  # Windows only; Linux uses PATH
 

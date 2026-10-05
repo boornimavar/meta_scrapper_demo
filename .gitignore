@@ -18,3 +18,5 @@ filtered_design_ads_selected.csv
 # Secrets
 .env
 .env.*
+# Test cache
+.pytest_cache/

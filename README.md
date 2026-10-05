@@ -34,6 +34,7 @@ Save / bookmark → saved_creatives.db (persistent)
 | `design_classifier.pkl` | Design vs. non-design classifier |
 | `rank_model_v1.pkl` | Rank model that produces `rank_score` |
 | `meta_ads_collector_source.zip` | Source of the `meta_ads_collector` package (unpacked in the Docker build) |
+| `tests/` | pytest suite |
 | `Dockerfile`, `render.yaml`, `DEPLOY.md` | Render deployment |
 
 ## Dashboard features
@@ -81,6 +82,32 @@ Notes:
 - The first search is slower while CLIP loads its model.
 - Set `CREATIVE_LENS_DATA_DIR` to store databases and model files somewhere
   other than the project folder (the Docker image uses `/var/data`).
+
+## Command-line tools
+
+`meta_design_scraper_session.py` also runs on its own:
+
+```bash
+# Search once: adds results to master.db and writes an HTML review page to bulk_output/BROAD_SEARCH/
+.venv313\Scripts\python.exe meta_design_scraper_session.py --broad-search --search-query "skincare" --search-country IN
+
+# Open accumulated results from master.db as an HTML page
+.venv313\Scripts\python.exe meta_design_scraper_session.py --browse --browse-category skincare
+
+# Retrain rank_model_v1.pkl from labeled_training_data*.csv files
+.venv313\Scripts\python.exe meta_design_scraper_session.py --retrain --training-data-dir training_data
+```
+
+## Tests
+
+```bash
+.venv313\Scripts\python.exe -m pip install -r requirements-dev.txt
+.venv313\Scripts\python.exe -m pytest tests
+```
+
+The tests cover the API routes, database helpers and deduplication. They
+never call Meta (the live search is replaced with a fake) and run against
+a temporary data folder, so your real databases are not touched.
 
 ## API
 

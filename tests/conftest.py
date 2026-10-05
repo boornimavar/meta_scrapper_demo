@@ -76,6 +76,9 @@ def app_env():
         server._scrape_progress.clear()
     with server._stop_events_lock:
         server._stop_events.clear()
+    with server._progress_lock:
+        server._failures.clear()
+        server._last_activity.clear()
     yield server
     # Let any background search a test started finish, so it isn't still
     # holding the session DB open when the next test deletes it (Windows
@@ -99,19 +102,26 @@ def fake_pipeline(monkeypatch):
 
     Set `behaviour` to choose what the fake does: "insert" writes `rows`
     to the session DB, "wait" loops until the Stop button is pressed,
-    "fail" raises.
+    "fail" / "rate_limited" / "timeout" raise like the collector does.
     """
     state = {"behaviour": "insert", "rows": [], "calls": []}
+    errors = {
+        "fail": "Meta unavailable",
+        "rate_limited": "Max retries exceeded due to rate limiting",
+        "timeout": "Failed to perform, curl: (28) Operation timed out after 450847 milliseconds with 0 bytes received.",
+    }
 
     def fake(args, progress_callback=None, stop_check=None, db_path=None, save_run_artifacts=True):
         state["calls"].append(args.search_query)
-        if state["behaviour"] == "fail":
-            raise RuntimeError("Meta unavailable")
+        if state["behaviour"] in errors:
+            raise RuntimeError(errors[state["behaviour"]])
         if state["behaviour"] == "wait":
             deadline = time.time() + 5
             while not stop_check() and time.time() < deadline:
                 time.sleep(0.01)
             return
+        for n in range(1, len(state["rows"]) + 1):
+            progress_callback(n, 0, "collecting")
         progress_callback(0, len(state["rows"]), "analyzing")
         insert_rows(db_path, state["rows"])
         progress_callback(len(state["rows"]), len(state["rows"]), "analyzing")

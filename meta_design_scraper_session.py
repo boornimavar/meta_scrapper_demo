@@ -1306,16 +1306,22 @@ def search_ads_broad(
     end_date=None,
     static_only=False,
     sort_by=None,
+    on_collect=None,
+    stop_check=None,
 ):
     """
     Broad Meta Ad Library acquisition for the future internal app.
 
-    This is intentionally separate from the legacy brand/page workflow below.
     It searches by keyword without requiring a predefined brand/page ID and
     returns one normalized record per creative.
 
     No images are written to disk here. The existing intelligence pipeline can
     consume the returned image_url values later.
+
+    on_collect(ad_count) is called after every ad Meta returns, so callers can
+    show live collection progress and notice when Meta stops responding.
+    stop_check() is checked before each ad; when it returns True collection
+    ends early and the creatives gathered so far are returned.
     """
     collector = MetaAdsCollector()
 
@@ -1368,7 +1374,12 @@ def search_ads_broad(
     ad_count = 0
 
     for ad in ads:
+        if stop_check is not None and stop_check():
+            print(f"\n[STOPPED] Collection ended early after {ad_count} ad(s).")
+            break
         ad_count += 1
+        if on_collect is not None:
+            on_collect(ad_count)
         page = get_attr(ad, "page", default=None)
         page_name = clean_text(get_attr(page, "name", "page_name", default=""))
         page_id = clean_text(get_attr(page, "id", "page_id", default=""))
@@ -1669,7 +1680,15 @@ def run_broad_search_pipeline(args, progress_callback=None, stop_check=None, db_
         end_date=parse_date(args.search_end_date),
         static_only=True,
         sort_by=getattr(args, "search_sort_by", None),
+        on_collect=(lambda n: progress_callback(n, 0, stage="collecting")) if progress_callback else None,
+        stop_check=stop_check,
     )
+
+    if stop_check is not None and stop_check():
+        print("\n[STOPPED] Stop requested during collection - skipping analysis.")
+        if progress_callback:
+            progress_callback(0, len(records), stage="stopped")
+        return
 
     if not records:
         print("\nNo image creatives were returned. Nothing to analyze.")

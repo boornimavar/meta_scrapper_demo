@@ -104,6 +104,7 @@ body{font-size:15px;line-height:1.55;letter-spacing:0}
   .session-complete{font-size:11px}
   .error-banner{font-size:12px}
 }
+.analysis-foot[hidden]{display:none}
 
 </style>
 </head>
@@ -161,7 +162,7 @@ body{font-size:15px;line-height:1.55;letter-spacing:0}
   <section id="progressBar" aria-live="polite">
     <div class="session-head"><div><div class="session-kicker">Live search session</div><div class="session-title" id="sessionTitle">Finding relevant creative</div></div><div class="stage-pills"><div class="stage-pill active" id="collectStage"><span class="stage-dot"></span><span class="stage-index">01</span> Collection</div><div class="stage-pill" id="analysisStage"><span class="stage-dot"></span><span class="stage-index">02</span> Analysis</div></div></div>
     <div class="session-body">
-      <div class="stage-copy"><div class="stage-icon" id="stageIcon">⌕</div><div class="stage-text"><h3 id="progressTitle">Collecting ads from Meta Ad Library</h3><p id="progressText">Searching the selected market and gathering eligible static image creatives. Analysis begins when collection finishes.</p></div><button class="stop-btn" id="stopBtn" onclick="stopCurrentScrape()">■ Stop search</button></div>
+      <div class="stage-copy"><div class="stage-icon" id="stageIcon">⌕</div><div class="stage-text"><h3 id="progressTitle">Collecting ads from Meta Ad Library</h3><p id="progressText">Searching the selected market and gathering eligible static image creatives. Analysis begins when collection finishes.</p></div><button class="stop-btn" id="stopBtn" onclick="stopCurrentScrape()">■ Stop search</button><button class="stop-btn" id="retryBtn" onclick="retryCurrentSearch()" style="display:none">↻ Retry search</button></div>
       <div class="collect-indeterminate" id="collectTrack"></div>
       <div class="analysis-grid" id="analysisGrid">
         <div class="metric"><div class="metric-label">Ads collected</div><div class="metric-value" id="collectedNum">0</div><div class="metric-sub">Returned by Meta</div></div>
@@ -187,7 +188,9 @@ function clearError(){$('errorBanner').classList.remove('show');$('errorBanner')
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function chooseCategory(query,label){document.querySelectorAll('.category-btn').forEach(b=>b.classList.toggle('active',b.dataset.query===query));$('fCategory').value=query;$('q').value=query;showExplore();if(query)submitSearch();else loadCreatives('')}
 function submitSearch(){const selectedCategory=$('fCategory').value;const q=$('q').value.trim()||selectedCategory;if(!q){showError('Choose an industry or enter a search phrase first.');$('q').focus();return} $('q').value=q;if(q!==selectedCategory)$('fCategory').value='';document.querySelectorAll('.category-btn').forEach(b=>b.classList.toggle('active',b.dataset.query===q));loadCreatives(q)}
-async function loadCreatives(typedSearch){
+function describeFailure(p){const mins=Math.ceil(Number(p.retry_after||0)/60);return (p.message||'The search could not finish. Check the server terminal for details.')+(mins>0?` You can retry in about ${mins} minute${mins===1?'':'s'}.`:' You can retry it now.')}
+function retryCurrentSearch(){if(lastSearchQuery)loadCreatives(lastSearchQuery,{retry:true})}
+async function loadCreatives(typedSearch,opts={}){
   const requestId=++loadRequestId;
   if(pollTimer)clearInterval(pollTimer);
   pollTimer=null;pollGeneration++;currentScrapeTarget=null;hideSkeletons();
@@ -196,7 +199,7 @@ async function loadCreatives(typedSearch){
   const cat=typeof typedSearch==='string'?typedSearch:$('fCategory').value;
   const country=$('fCountry').value;
   const platform=$('fPlatform').value,media=$('fMedia').value,status=$('fStatus').value,days=$('fDate').value,brand=$('fBrand').value.trim();
-  if(cat)params.set('category',cat);if(country)params.set('country',country);if(platform)params.set('platform',platform);if(media)params.set('media_type',media);if(status)params.set('status',status);if(days)params.set('days',days);if(brand)params.set('brand',brand);params.set('design_led_only',designLedOnly?'true':'false');
+  if(cat)params.set('category',cat);if(country)params.set('country',country);if(platform)params.set('platform',platform);if(media)params.set('media_type',media);if(status)params.set('status',status);if(days)params.set('days',days);if(brand)params.set('brand',brand);params.set('design_led_only',designLedOnly?'true':'false');if(opts.retry)params.set('retry','1');
   $('resultCount').textContent='Loading creatives…';
   try{
     const res=await fetch('/api/creatives?'+params.toString());
@@ -211,6 +214,7 @@ async function loadCreatives(typedSearch){
       const p=await statusRes.json();
       if(requestId!==loadRequestId)return;
       if(['collecting','starting','analyzing'].includes(p.stage))pollScrapeProgress(cat,country);
+      else if(p.stage==='failed'){$('progressBar').classList.add('show');setStage('failed');$('progressText').textContent=describeFailure(p);showError(describeFailure(p));hideSkeletons()}
       else {setProgressSnapshot(p);setStage(p.stage==='idle'?'idle':p.stage);hideSkeletons()}
     }else{
       setStage('idle');resetProgressMetrics();$('progressBar').classList.remove('show');hideSkeletons();
@@ -245,7 +249,7 @@ function setStage(stage){
   $('progressTitle').textContent=idle?'Ready to discover':collecting?'Collecting ads from Meta Ad Library':analyzing?'Analyzing creative quality':stage==='failed'?'Search could not finish':'Search complete';
   $('sessionTitle').textContent=idle?'Choose a category or enter a search':collecting?'Finding relevant creative':analyzing?'Evaluating the creative':stage==='failed'?'Search interrupted':'Your creative results';
   $('progressText').textContent=idle?'Your results and search progress will appear here.':collecting?'Searching the selected market and gathering eligible static image creatives. Analysis begins when collection finishes.':analyzing?'The collector has finished. The model is now evaluating each creative and ranking design-led matches.':stage==='failed'?'The search could not finish. Check the server message and try again.':'The search has finished. Revisit this category to see the results already collected in this session.';
-  $('sessionComplete').classList.toggle('show',['done','stopped'].includes(stage));$('stopBtn').style.display=collecting||analyzing?'inline-block':'none';$('stopBtn').disabled=false;$('stopBtn').textContent='■ Stop search';
+  $('sessionComplete').classList.toggle('show',['done','stopped'].includes(stage));$('stopBtn').style.display=collecting||analyzing?'inline-block':'none';$('stopBtn').disabled=false;$('stopBtn').textContent='■ Stop search';$('retryBtn').style.display=stage==='failed'?'inline-block':'none';
   if(idle){$('progressBar').classList.remove('show');resetProgressMetrics()}
 }
 function animateMetric(id,value){const el=$(id);const n=Math.max(0,Number(value)||0);if(el.textContent!==String(n)){el.textContent=n;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}}
@@ -274,7 +278,7 @@ function pollScrapeProgress(category,country){
       const statusParams=new URLSearchParams({category:category||'',country:country||'',design_led_only:designLedOnly?'true':'false'});
       [['platform','fPlatform'],['media_type','fMedia'],['status','fStatus'],['days','fDate'],['brand','fBrand']].forEach(([key,id])=>{const value=$(id).value;if(value)statusParams.set(key,value)});
       const res=await fetch('/api/scrape-status?'+statusParams.toString());const p=await res.json();if(!isCurrent())return;
-      if(p.stage==='collecting'||p.stage==='starting')setStage(p.stage);
+      if(p.stage==='collecting'||p.stage==='starting'){setStage(p.stage);if(Number(p.collected)>0)$('progressText').textContent=`${p.collected} ads collected from Meta so far. Analysis begins when collection finishes.`}
       else if(p.stage==='analyzing'){
         setStage('analyzing');setProgressSnapshot(p);$('analysisFootLeft').textContent='ANALYSIS IN PROGRESS';await refreshResultsQuietly(category,country);
       }else if(p.stage==='done'){
@@ -282,7 +286,7 @@ function pollScrapeProgress(category,country){
       }else if(p.stage==='stopped'){
         setProgressSnapshot(p);await finish('stopped','Search stopped by request. Showing the creatives processed so far.');
       }else if(p.stage==='failed'){
-        await finish('failed','The search could not finish. Check the server terminal for details.');showError('This search did not finish. You can retry it.');
+        await finish('failed',describeFailure(p));showError(describeFailure(p));
       }else if(p.stage==='idle'&&attempts>3){clearInterval(pollTimer);pollTimer=null;currentScrapeTarget=null;setStage('idle');hideSkeletons()}
     }catch(e){/* transient polling issue; retry next interval */}
   },1200);

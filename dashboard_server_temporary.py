@@ -14,6 +14,7 @@ Then open: http://127.0.0.1:5000
 """
 import sqlite3
 import json
+import math
 import os
 import threading
 import time
@@ -55,6 +56,75 @@ _session_searched_targets = set()
 
 _stop_events = {}  # target -> threading.Event(), set when the user clicks Stop
 _stop_events_lock = threading.Lock()
+
+# Meta throttles by network. A failed search is never restarted automatically
+# (that only extends the throttling); the person retries explicitly, and only
+# after a cooldown that depends on why it failed.
+COLLECT_STALL_SECONDS = 180  # give up if Meta sends no new ad for this long
+WATCHDOG_INTERVAL_SECONDS = 5
+RETRY_COOLDOWN_SECONDS = {"rate_limited": 15 * 60, "no_response": 5 * 60, "error": 0}
+FAILURE_MESSAGES = {
+    "rate_limited": "Meta is rate-limiting searches from this network. Wait a while - ideally a few hours - before searching again.",
+    "no_response": "Meta stopped responding on this network. Try again later or from a different connection.",
+    "error": "The search could not finish. Check the server terminal for details.",
+}
+
+_failures = {}  # target -> {"reason", "failed_at"}; guarded by _progress_lock
+_last_activity = {}  # target -> time of the last progress update; guarded by _progress_lock
+
+
+def classify_failure(exc):
+    """Map a collector exception to a reason the dashboard can explain."""
+    text = str(exc).lower()
+    if "rate limit" in text:
+        return "rate_limited"
+    if any(marker in text for marker in ("timed out", "timeout", "connection was reset", "connection reset", "recv failure", "could not connect")):
+        return "no_response"
+    return "error"
+
+
+def _mark_failed_locked(target, reason):
+    """Record a failed search. Caller must hold _progress_lock."""
+    prior = _scrape_progress.get(target, {})
+    _scrape_progress[target] = {
+        "stage": "failed",
+        "reason": reason,
+        "message": FAILURE_MESSAGES[reason],
+        "done": 0,
+        "total": 0,
+        "collected": int(prior.get("collected", 0)),
+    }
+    _failures[target] = {"reason": reason, "failed_at": time.time()}
+
+
+def retry_wait_seconds(target):
+    """Seconds until a failed target may be retried, or None if it has not failed.
+    Caller must hold _progress_lock."""
+    failure = _failures.get(target)
+    if not failure:
+        return None
+    ready_at = failure["failed_at"] + RETRY_COOLDOWN_SECONDS[failure["reason"]]
+    return max(0, math.ceil(ready_at - time.time()))
+
+
+def watch_for_stall(target, stop_event):
+    """Fail a search whose collection has gone quiet, instead of letting the
+    dashboard sit on "collecting" until the collector's own retries give up."""
+    while True:
+        time.sleep(WATCHDOG_INTERVAL_SECONDS)
+        with _scrapes_lock:
+            if target not in _scrapes_in_progress:
+                return
+        with _progress_lock:
+            stage = _scrape_progress.get(target, {}).get("stage")
+            quiet_for = time.time() - _last_activity.get(target, time.time())
+            stalled = stage in ("starting", "collecting") and quiet_for > COLLECT_STALL_SECONDS
+            if stalled:
+                _mark_failed_locked(target, "no_response")
+        if stalled:
+            print(f"[ON-DEMAND] No response from Meta for {COLLECT_STALL_SECONDS}s - marking '{target[0]}' as failed.")
+            stop_event.set()
+            return
 
 
 def get_saved_conn():
@@ -135,16 +205,24 @@ def run_on_demand_scrape(category, country, stop_event):
     print(f"[ON-DEMAND] '{category}' / {country or 'any country'} - scraping live, results will stream in...")
 
     def on_progress(done, total, stage):
-        # The collector does not expose page-by-page counts, so collection is
-        # intentionally shown as indeterminate. Once analysis starts, `total`
-        # is the actual number of creatives returned by Meta.
+        # During collection `done` is the number of ads Meta has returned so
+        # far. Once analysis starts, `total` is the number of creatives to analyze.
         with _progress_lock:
+            _last_activity[target] = time.time()
             prior = _scrape_progress.get(target, {})
+            if prior.get("stage") == "failed":
+                return  # the stall watchdog already gave up on this search
+            if stage == "collecting":
+                collected = int(done or 0)
+            elif stage == "analyzing":
+                collected = int(total or 0)
+            else:
+                collected = int(prior.get("collected", 0))
             _scrape_progress[target] = {
                 "stage": stage,
-                "done": int(done or 0),
-                "total": int(total or 0),
-                "collected": int(total or 0) if stage == "analyzing" else int(prior.get("collected", 0)),
+                "done": 0 if stage == "collecting" else int(done or 0),
+                "total": 0 if stage == "collecting" else int(total or 0),
+                "collected": collected,
             }
 
     args = SimpleNamespace(
@@ -162,29 +240,31 @@ def run_on_demand_scrape(category, country, stop_event):
         skip_browser_open=True,
         search_sort_by=None,
     )
+    failure_reason = None
     try:
         run_broad_search_pipeline(args, progress_callback=on_progress, stop_check=stop_event.is_set, db_path=SESSION_DB_PATH, save_run_artifacts=False)
     except Exception as exc:
-        print(f"[ON-DEMAND] Scrape failed: {exc}")
-        with _progress_lock:
-            _scrape_progress[target] = {"stage": "failed", "done": 0, "total": 0}
+        failure_reason = classify_failure(exc)
+        print(f"[ON-DEMAND] Scrape failed ({failure_reason}): {exc}")
     finally:
         # Publish a terminal state so the dashboard can stop polling and
         # transition cleanly from the live analysis panel to the gallery.
         with _progress_lock:
             current = _scrape_progress.get(target, {})
             if current.get("stage") != "failed":
-                current["stage"] = "stopped" if stop_event.is_set() else "done"
-                current.setdefault("done", 0)
-                current.setdefault("total", 0)
-                current.setdefault("collected", current.get("total", 0))
-                _scrape_progress[target] = current
+                if failure_reason:
+                    _mark_failed_locked(target, failure_reason)
+                else:
+                    current["stage"] = "stopped" if stop_event.is_set() else "done"
+                    current.setdefault("done", 0)
+                    current.setdefault("total", 0)
+                    current.setdefault("collected", current.get("total", 0))
+                    _scrape_progress[target] = current
+        # The target stays "searched" even when it failed, so refreshing the
+        # gallery never silently starts another search. Retrying is explicit.
         with _scrapes_lock:
             _scrapes_in_progress.discard(target)
-            if current.get("stage") == "failed":
-                _session_searched_targets.discard(target)
-            else:
-                _session_searched_targets.add(target)
+            _session_searched_targets.add(target)
         with _stop_events_lock:
             _stop_events.pop(target, None)
 
@@ -207,24 +287,38 @@ def api_creatives():
 
     min_rank_score = 0.5 if design_led_only else None
 
+    retry_requested = request.args.get("retry") == "1"
+
     on_demand_triggered = False
+    retry_after = None
     target = normalize_target(category, country)
     should_scrape = False
     if category:
         with _scrapes_lock:
-            if target not in _scrapes_in_progress and target not in _session_searched_targets:
-                _scrapes_in_progress.add(target)
-                # Mark it immediately to close the race between rapid repeated requests.
-                _session_searched_targets.add(target)
-                should_scrape = True
+            if target not in _scrapes_in_progress:
+                if target not in _session_searched_targets:
+                    should_scrape = True
+                elif retry_requested:
+                    with _progress_lock:
+                        wait = retry_wait_seconds(target)
+                        if wait == 0:
+                            _failures.pop(target, None)
+                            should_scrape = True
+                        else:
+                            retry_after = wait
+                if should_scrape:
+                    _scrapes_in_progress.add(target)
+                    # Mark it immediately to close the race between rapid repeated requests.
+                    _session_searched_targets.add(target)
     if should_scrape:
         stop_event = threading.Event()
         with _stop_events_lock:
             _stop_events[target] = stop_event
         with _progress_lock:
-            _scrape_progress[target] = {"stage": "starting", "done": 0, "total": 0}
-        thread = threading.Thread(target=run_on_demand_scrape, args=(category, country, stop_event), daemon=True)
-        thread.start()
+            _scrape_progress[target] = {"stage": "starting", "done": 0, "total": 0, "collected": 0}
+            _last_activity[target] = time.time()
+        threading.Thread(target=run_on_demand_scrape, args=(category, country, stop_event), daemon=True).start()
+        threading.Thread(target=watch_for_stall, args=(target, stop_event), daemon=True).start()
         on_demand_triggered = True
 
     rows = browse_master_db(
@@ -244,6 +338,7 @@ def api_creatives():
         "rows": rows,
         "on_demand_scraped": on_demand_triggered,
         "scrape_target": {"category": category, "country": (country or "").upper()} if on_demand_triggered else None,
+        "retry_after": retry_after,
     })
 
 
@@ -254,6 +349,8 @@ def api_scrape_status():
     target = normalize_target(category, country)
     with _progress_lock:
         progress = dict(_scrape_progress.get(target, {}))
+        if progress.get("stage") == "failed":
+            progress["retry_after"] = retry_wait_seconds(target) or 0
     if not progress:
         return jsonify({"stage": "idle"})
 

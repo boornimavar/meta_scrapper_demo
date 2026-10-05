@@ -214,6 +214,8 @@ def run_on_demand_scrape(category, country, stop_event):
                 return  # the stall watchdog already gave up on this search
             if stage == "collecting":
                 collected = int(done or 0)
+                if collected and collected % 10 == 0:
+                    print(f"[ON-DEMAND] '{category}': {collected} ads collected from Meta so far")
             elif stage == "analyzing":
                 collected = int(total or 0)
             else:

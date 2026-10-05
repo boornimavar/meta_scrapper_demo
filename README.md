@@ -62,8 +62,17 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install git+https://github.com/openai/CLIP.git
 ```
 
-Install `meta_ads_collector` from `meta_ads_collector_source.zip` if it is
-not already available in the environment.
+Install `meta_ads_collector` **1.4.0** from `meta_ads_collector_source.zip`
+(the same copy the Dockerfile uses). Do not `pip install meta-ads-collector`:
+the newer 1.5.x raises on rate limiting and makes more requests per search,
+which makes searches fail and hit Meta's limits sooner.
+
+```bash
+.venv313\Scripts\python.exe -m pip uninstall -y meta-ads-collector
+powershell -Command "Expand-Archive meta_ads_collector_source.zip .venv313\Lib\site-packages\meta_ads_collector -Force"
+```
+
+The server prints the collector version at startup and warns if it is not 1.4.0.
 
 ## Running
 

@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
+import meta_ads_collector
 from flask import Flask, jsonify, request, send_from_directory
 
 from meta_design_scraper_session import (
@@ -30,6 +31,13 @@ from meta_design_scraper_session import (
 )
 
 app = Flask(__name__)
+
+# 1.4.0 (meta_ads_collector_source.zip) is the version this app works with.
+# 1.5.1 raises on rate limiting and pages through empty results, which made
+# searches fail outright and hit Meta's limits sooner.
+EXPECTED_COLLECTOR_VERSION = "1.4.0"
+COLLECTOR_VERSION = getattr(meta_ads_collector, "__version__", "unknown")
+
 SAVED_DB_PATH = BASE_DIR / "saved_creatives.db"
 SESSION_DB_PATH = BASE_DIR / "session_creatives.db"
 
@@ -482,6 +490,9 @@ if __name__ == "__main__":
         SESSION_DB_PATH.unlink()
     conn = create_database(SESSION_DB_PATH)
     conn.close()
+    print(f"Meta collector version: {COLLECTOR_VERSION}")
+    if COLLECTOR_VERSION != EXPECTED_COLLECTOR_VERSION:
+        print(f"  WARNING: expected {EXPECTED_COLLECTOR_VERSION}. Reinstall it from meta_ads_collector_source.zip (see README).")
     print(f"Temporary search results: {SESSION_DB_PATH.resolve()}")
     print(f"Persistent bookmarks: {SAVED_DB_PATH.resolve()}")
     print("Searches stream results in live as they're found. No count to set - stop anytime, or let it run out naturally.")
